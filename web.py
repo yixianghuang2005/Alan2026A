@@ -3,6 +3,8 @@ import json
 import firebase_admin
 from firebase_admin import credentials, firestore
 from google.cloud.firestore_v1.base_query import FieldFilter
+import requests
+from bs4 import BeautifulSoup
 
 # 判斷是在 Vercel 還是本地
 if os.path.exists('serviceAccountKey.json'):
@@ -170,6 +172,10 @@ def cup():
         
     return render_template('cup.html', result=result)
 
+@app.route("/sp1")
+def sp1():
+    R = "20260421"
+    return R
 
 
 
