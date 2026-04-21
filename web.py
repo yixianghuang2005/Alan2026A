@@ -18,7 +18,7 @@ else:
 
 firebase_admin.initialize_app(cred)
 
-from flask import Flask,render_template,request
+from flask import Flask, render_template, request
 from datetime import datetime
 import random
 app = Flask(__name__)
@@ -35,8 +35,31 @@ def index():
     link += "<a href=/cup>擲茭</a><hr>"
     link += "<br><a href=/read>讀取Firestore資料(根據lab遞減，取前4)</a><br>"
     link += "<a href=/search>查詢老師姓名關鍵字</a><br>"
+    # 新增的超連結
+    link += "<a href=/movie>查詢開眼即將上映電影</a><br>"
     return link
 
+# 新增的路由：爬取開演電影即將上映資訊
+@app.route("/movie")
+def movie():
+    url = "http://www.atmovies.com.tw/movie/next/"
+    Data = requests.get(url)
+    Data.encoding = "utf-8"
+    sp = BeautifulSoup(Data.text, "html.parser")
+    result = sp.select(".filmListAllX li")
+    
+    R = "<h1>近期上映電影</h1>"
+    for item in result:
+        try:
+            name = item.find("img").get('alt')
+            link = "https://www.atmovies.com.tw" + item.find("a").get('href')
+            R += f"電影名稱：{name}<br>"
+            R += f"介紹連結：<a href='{link}' target='_blank'>{link}</a><br><br>"
+        except:
+            continue
+    
+    R += "<a href=/>回到首頁</a>"
+    return R
 
 @app.route("/search", methods=["GET", "POST"])
 def search():
@@ -65,19 +88,15 @@ def search():
 
 @app.route("/read")
 def read():
-
     db = firestore.client()
     Temp = ""
     collection_ref = db.collection("靜宜資管2026a")
-    docs = collection_ref.order_by("lab",direction=firestore.Query.DESCENDING).limit(4).get()
+    docs = collection_ref.order_by("lab", direction=firestore.Query.DESCENDING).limit(4).get()
 
     for doc in docs:
         Temp += str(doc.to_dict()) + "<br>"
 
     return Temp
-
-
-    return "<h1>資訊管理導論</h1><a href=/>回到網站首頁<a>"
 
 @app.route("/mis")
 def course():
@@ -90,17 +109,17 @@ def today():
     month = str(now.month)
     day = str(now.day)
     now = year +"年"+ month +"月"+day+"日"
-    return render_template("today.html",datetime = now)
+    return render_template("today.html", datetime = now)
 
 @app.route("/about")
 def about():
    return render_template("mis2a.html")
 
-@app.route("/welcome",methods=["GET"])
+@app.route("/welcome", methods=["GET"])
 def welcome():
     x = request.values.get("u")
     y = request.values.get("dep")
-    return render_template("welcome.html",name = x , dep = y )
+    return render_template("welcome.html", name = x , dep = y )
 
 @app.route("/account", methods=["GET", "POST"])
 def account():
@@ -143,20 +162,15 @@ def calc():
     else:
         return render_template("calc.html", result=None)
 
-
 @app.route('/cup', methods=["GET"])
 def cup():
-    # 檢查網址是否有 ?action=toss
-    #action = request.args.get('action')
     action = request.values.get("action")
     result = None
     
     if action == 'toss':
-        # 0 代表陽面，1 代表陰面
         x1 = random.randint(0, 1)
         x2 = random.randint(0, 1)
         
-        # 判斷結果文字
         if x1 != x2:
             msg = "聖筊：表示神明允許、同意，或行事會順利。"
         elif x1 == 0:
@@ -178,15 +192,12 @@ def sp1():
     url = "https://alan2026-a.vercel.app/about"
     Data = requests.get(url)
     Data.encoding = "utf-8"
-    #print(Data.text)
     sp = BeautifulSoup(Data.text, "html.parser")
-    result=sp.select("td a")
+    result = sp.select("td a")
 
     for item in result:
         R += item.text + "<br>"+ item.get("href") + "<br><br>"
     return R
-
-
 
 if __name__ == "__main__":
     app.run(debug=True)
