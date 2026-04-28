@@ -62,7 +62,7 @@ def movie3():
                 result += f"片長：{movie['showLength']} 分鐘<br>"
                 result += f"上映日期：{movie['showDate']}<br>"
                 result += f"最後更新：{movie.get('lastUpdate', '無資料')}<br>"
-                result += f"介紹連結：<a href='{movie['hyperlink']}' target='_blank'>點我觀看</a><br>"
+                result += f"介紹連結：{movie['hyperlink']} <a href='{movie['hyperlink']}' target='_blank'>點我觀看</a><br>"
                 result += f"<img src='{movie['picture']}' width='200'><br><hr>"
         
         if not found:
