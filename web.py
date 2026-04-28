@@ -35,9 +35,47 @@ def index():
     link += "<a href=/cup>擲茭</a><hr>"
     link += "<br><a href=/read>讀取Firestore資料(根據lab遞減，取前4)</a><br>"
     link += "<a href=/search>查詢老師姓名關鍵字</a><br>"
-    # 新增的超連結
     link += "<a href=/movie>查詢開眼即將上映電影</a><br>"
+    link += "<a href=/movie2>電影最近更新的日期</a><br>"
+    link += "<a href=/movie3>查詢相關電影資訊</a><br>"
     return link
+
+
+@app.route("/movie3", methods=["GET", "POST"])
+def movie3():
+    if request.method == "POST":
+        keyword = request.form["keyword"]
+        db = firestore.client()
+        # 指向你的電影資料庫集合
+        collection_ref = db.collection("電影2A")
+        docs = collection_ref.get()
+        
+        result = f"您查詢的電影關鍵字是：<b>{keyword}</b><br><br>"
+        found = False
+        
+        for doc in docs:
+            movie = doc.to_dict()
+            # 判斷關鍵字是否在電影標題中 (忽略大小寫可用 .lower())
+            if keyword in movie.get("title", ""):
+                found = True
+                result += f"電影名稱：{movie['title']}<br>"
+                result += f"片長：{movie['showLength']} 分鐘<br>"
+                result += f"上映日期：{movie['showDate']}<br>"
+                result += f"最後更新：{movie.get('lastUpdate', '無資料')}<br>"
+                result += f"介紹連結：<a href='{movie['hyperlink']}' target='_blank'>點我觀看</a><br>"
+                result += f"<img src='{movie['picture']}' width='200'><br><hr>"
+        
+        if not found:
+            result += "抱歉，資料庫中找不到符合關鍵字的電影。"
+            
+        result += "<br><a href=/movie3>重新查詢</a>"
+        result += "<br><a href=/>回到首頁</a>"
+        return result
+    else:
+        # 這裡建議建立一個 search_movie.html，或暫時沿用 search.html 並修改其中的 action
+        return render_template("search_movie.html")
+
+
 
 
 @app.route("/movie2")
