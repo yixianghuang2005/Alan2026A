@@ -38,7 +38,44 @@ def index():
     link += "<a href=/movie>查詢開眼即將上映電影</a><br>"
     link += "<a href=/movie2>電影最近更新的日期</a><br>"
     link += "<a href=/movie3>查詢相關電影資訊</a><br>"
+    link += "<a href=/road>道路事故查詢</a><br>"
+    link += "<a href=/weather>查詢縣市天氣</a><br>"
     return link
+
+@app.route("/weather", methods=["GET", "POST"])
+def weather():
+    if request.method == "POST":
+        # 接收使用者輸入的縣市
+        city = request.form["city"]
+        
+        # --- 以下為你提供的原始程式碼功能 ---
+        city = city.replace("台","臺")
+        url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=rdec-key-123-45678-011121314&format=JSON&locationName="+ city
+        Data = requests.get(url)
+        
+        # 解析資料
+        jdata = json.loads(Data.text)
+        WeatherTitle = jdata["records"]["datasetDescription"]
+        Weather = jdata["records"]["location"][0]["weatherElement"][0]["time"][0]["parameter"]["parameterName"]
+        Rain = jdata["records"]["location"][0]["weatherElement"][1]["time"][0]["parameter"]["parameterName"]
+        # ----------------------------------
+
+        # 將結果組合成網頁字串回傳
+        res = f"<h3>{WeatherTitle}</h3>"
+        res += f"{city}目前天氣預報<br>"
+        res += f"{Weather}，降雨機率：{Rain}%"
+        res += "<br><br><a href='/weather'>重新查詢</a> | <a href='/'>回到首頁</a>"
+        return res
+    else:
+        # GET 請求時顯示輸入框
+        html = """
+        <form method="post">
+            請輸入欲查詢的縣市：<input type="text" name="city" placeholder="例如：臺中市">
+            <button type="submit">查詢</button>
+        </form>
+        <br><a href="/">回到首頁</a>
+        """
+        return html
 
 
 @app.route("/movie3", methods=["GET", "POST"])
