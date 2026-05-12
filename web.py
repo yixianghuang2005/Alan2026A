@@ -44,17 +44,43 @@ def index():
     link += "<a href=/rate>本周新片DB(含電影分級) </a><br>"
     return link
 
+
+
+# 初始化 Firestore 
+db = firestore.client()
+
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    # build a request object
+    # 取得 Dialogflow 傳來的 JSON
     req = request.get_json(force=True)
-    # fetch queryResult from json
-    action =  req["queryResult"]["action"]
-    #msg =  req["queryResult"]["queryText"]
-    #info = "我是黃義祥設計的電影聊天機器人，動作：" + action + "； 查詢內容：" + msg
+    
+    # 取得 action
+    action = req["queryResult"]["action"]
+    
     if (action == "rateChoice"):
-        rate =  req["queryResult"]["parameters"]["rate"]
-        info = "我是黃義祥設計的電影聊天機器人,您選擇的電影分級是：" + rate
+        # 取得使用者選擇的分級
+        rate = req["queryResult"]["parameters"]["rate"]
+        
+        # 查詢 Firestore 資料庫
+        # 篩選欄位 "rate" 等於 使用者選擇的 rate
+        collection_ref = db.collection("本週新片含分級")
+        docs = collection_ref.where("rate", "==", rate).get()
+        
+        # 組合回覆訊息
+        info = "我是黃義祥設計的電影聊天機器人。查詢結果如下：\n"
+        info += "您選擇的分級是：" + rate + "\n"
+        
+        movie_list = ""
+        count = 0
+        for doc in docs:
+            count += 1
+            movie_data = doc.to_dict()
+            movie_list += f"{count}. {movie_data['title']}\n"
+        
+        if count > 0:
+            info += f"本週共有 {count} 部相關影片：\n" + movie_list
+        else:
+            info += "抱歉，本週新片中目前沒有這個分級的電影喔！"
 
     return make_response(jsonify({"fulfillmentText": info}))
 
