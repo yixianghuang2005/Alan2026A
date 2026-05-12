@@ -6,6 +6,7 @@ from google.cloud.firestore_v1.base_query import FieldFilter
 import requests
 from bs4 import BeautifulSoup
 
+
 # 判斷是在 Vercel 還是本地
 if os.path.exists('serviceAccountKey.json'):
     # 本地環境：讀取檔案
@@ -18,7 +19,8 @@ else:
 
 firebase_admin.initialize_app(cred)
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, make_response, jsonify
+
 from datetime import datetime
 import random
 app = Flask(__name__)
@@ -42,6 +44,17 @@ def index():
     link += "<a href=/weather>查詢縣市天氣</a><br>"
     link += "<a href=/rate>本周新片DB(含電影分級) </a><br>"
     return link
+
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    # build a request object
+    req = request.get_json(force=True)
+    # fetch queryResult from json
+    action =  req.get("queryResult").get("action")
+    msg =  req.get("queryResult").get("queryText")
+    info = "動作：" + action + "； 查詢內容：" + msg
+    return make_response(jsonify({"fulfillmentText": info}))
+
 
 @app.route("/rate")
 def rate():
