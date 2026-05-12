@@ -5,7 +5,7 @@ from firebase_admin import credentials, firestore
 from google.cloud.firestore_v1.base_query import FieldFilter
 import requests
 from bs4 import BeautifulSoup
-
+from flask import Flask, render_template, request, make_response, jsonify
 
 # 判斷是在 Vercel 還是本地
 if os.path.exists('serviceAccountKey.json'):
@@ -19,7 +19,6 @@ else:
 
 firebase_admin.initialize_app(cred)
 
-from flask import Flask, render_template, request, make_response, jsonify
 
 from datetime import datetime
 import random
@@ -50,9 +49,9 @@ def webhook():
     # build a request object
     req = request.get_json(force=True)
     # fetch queryResult from json
-    action =  req.get("queryResult").get("action")
-    msg =  req.get("queryResult").get("queryText")
-    info = "動作：" + action + "； 查詢內容：" + msg
+    action =  req["queryResult"]["action"]
+    msg =  req["queryResult"]["queryText"]
+    info = "我是黃義祥設計的電影機器人，動作：" + action + "； 查詢內容：" + msg
     return make_response(jsonify({"fulfillmentText": info}))
 
 
