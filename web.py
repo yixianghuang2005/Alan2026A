@@ -46,6 +46,12 @@ def index():
 
 
 
+
+@app.route("/demo")
+def demoo():
+    return render.render_template("demo.html")
+
+
 # 初始化 Firestore 
 db = firestore.client()
 
