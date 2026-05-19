@@ -58,38 +58,53 @@ db = firestore.client()
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
+    # 取得 Dialogflow 傳來的 JSON
     req = request.get_json(force=True)
+    
+    # 取得 action
     action = req["queryResult"]["action"]
     
-    if (action == "rateChoice"):
+    if action == "rateChoice":
+        # 取得使用者選擇的分級
         rate = req["queryResult"]["parameters"]["rate"]
+        
+        # 查詢 Firestore 資料庫
         collection_ref = db.collection("本週新片含分級")
         docs = collection_ref.where("rate", "==", rate).get()
         
-        # 標題部分
-        info = f"🎬 我是黃義祥設計的電影機器人\n"
-        info += f"您選擇的分級：【{rate}】\n"
+        # 標題資訊
+        info = f"🎬 我是黃義祥設計的電影聊天機器人\n"
+        info += f"您選擇的分級是：【{rate}】\n"
         
         movie_details = ""
         count = 0
+        
         for doc in docs:
             count += 1
             movie_data = doc.to_dict()
-            title = movie_data.get('title', '未知電影')
-            # 假設你的 Firestore 裡面有 'url' 這個欄位
-            url = movie_data.get('url', 'https://www.google.com') 
             
-            # 使用分隔線與編號，讓視覺分段更清晰
-            movie_details += f"━━━━━━━━━━━━\n"
+            # 抓取資料庫欄位，若找不到則顯示提示文字
+            title = movie_data.get("title", "未命名電影")
+            # 重要：請確認資料庫欄位名稱是否為 "url"
+            link = movie_data.get("url", "暫無連結資訊") 
+            
+            # 組合成易讀的分段格式
+            movie_details += f"━━━━━━━━━━━━━━\n"
             movie_details += f"🎥 第 {count} 部：{title}\n"
-            movie_details += f"🔗 詳情：{url}\n"
+            movie_details += f"🔗 介紹連結：{link}\n"
         
         if count > 0:
-            final_text = f"{info}本週共有 {count} 部相關影片：\n{movie_details}"
+            final_response = f"{info}本週共有 {count} 部相關影片：\n{movie_details}"
         else:
-            final_text = f"{info}\n抱歉，本週目前沒有這個分級的電影喔！"
+            final_response = f"{info}\n抱歉，本週新片中目前沒有【{rate}】分級的電影喔！"
 
-    return make_response(jsonify({"fulfillmentText": final_text}))
+        # 回傳給 Dialogflow
+        return make_response(jsonify({
+            "fulfillmentText": final_response
+        }))
+
+    # 處理其他 action
+    return make_response(jsonify({"fulfillmentText": "收到請求，但無法辨識 action。"}))
 
 @app.route("/rate")
 def rate():
