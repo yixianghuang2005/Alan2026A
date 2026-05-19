@@ -42,6 +42,7 @@ def index():
     link += "<a href=/road>道路事故查詢</a><br>"
     link += "<a href=/weather>查詢縣市天氣</a><br>"
     link += "<a href=/rate>本周新片DB(含電影分級) </a><br>"
+    link += "<a href=/demo>查詢電影、笑話Agent</a><br>"
     return link
 
 
