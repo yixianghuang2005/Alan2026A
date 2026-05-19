@@ -64,7 +64,7 @@ def webhook():
     # 取得 action
     action = req["queryResult"]["action"]
     
-    if action == "rateChoice":
+    if (action == "rateChoice"):
         # 取得使用者選擇的分級
         rate = req["queryResult"]["parameters"]["rate"]
         
@@ -73,8 +73,8 @@ def webhook():
         docs = collection_ref.where("rate", "==", rate).get()
         
         # 標題資訊
-        info = f"🎬 我是黃義祥設計的電影聊天機器人\n"
-        info += f"您選擇的分級是：【{rate}】\n"
+        info = f"🎬 我是黃義祥設計的電影機器人\n"
+        info += f"您選擇的分級：【{rate}】\n"
         
         movie_details = ""
         count = 0
@@ -83,28 +83,27 @@ def webhook():
             count += 1
             movie_data = doc.to_dict()
             
-            # 抓取資料庫欄位，若找不到則顯示提示文字
+            # 抓取電影標題
             title = movie_data.get("title", "未命名電影")
-            # 重要：請確認資料庫欄位名稱是否為 "url"
-            link = movie_data.get("url", "暫無連結資訊") 
             
-            # 組合成易讀的分段格式
+            # 🔥 關鍵修正：這裡必須對應你在 /rate 裡面寫的 "hyperlink"
+            link = movie_data.get("hyperlink", "暫無連結資訊") 
+            
+            # 分段格式化：加入分隔線讓手機 LINE 更好閱讀
             movie_details += f"━━━━━━━━━━━━━━\n"
             movie_details += f"🎥 第 {count} 部：{title}\n"
-            movie_details += f"🔗 介紹連結：{link}\n"
+            movie_details += f"🔗 介紹連結：\n{link}\n" # 網址換行顯示，方便點擊
         
         if count > 0:
             final_response = f"{info}本週共有 {count} 部相關影片：\n{movie_details}"
         else:
             final_response = f"{info}\n抱歉，本週新片中目前沒有【{rate}】分級的電影喔！"
 
-        # 回傳給 Dialogflow
         return make_response(jsonify({
             "fulfillmentText": final_response
         }))
 
-    # 處理其他 action
-    return make_response(jsonify({"fulfillmentText": "收到請求，但無法辨識 action。"}))
+    return make_response(jsonify({"fulfillmentText": "Action 無法辨識"}))
 
 @app.route("/rate")
 def rate():
