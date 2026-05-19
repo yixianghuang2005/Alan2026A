@@ -49,7 +49,7 @@ def index():
 
 @app.route("/demo")
 def demoo():
-    return render.render_template("demo.html")
+    return render_template("demo.html")
 
 
 # 初始化 Firestore 
