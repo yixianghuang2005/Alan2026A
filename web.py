@@ -136,6 +136,7 @@ def webhook():
             movie_details += f"━━━━━━━━━━━━━━\n"
             movie_details += f"🎥 第 {count} 部：{title}\n"
             movie_details += f"🔗 介紹連結：\n{link}\n" # 網址換行顯示，方便點擊
+
         
         if count > 0:
             final_response = f"{info}本週共有 {count} 部相關影片：\n{movie_details}"
@@ -145,6 +146,10 @@ def webhook():
         return make_response(jsonify({
             "fulfillmentText": final_response
         }))
+        
+    elif (action == "input.unknown"):
+        info =  req["queryResult"]["queryText"]
+    
 
     return make_response(jsonify({"fulfillmentText": "Action 無法辨識"}))
 
