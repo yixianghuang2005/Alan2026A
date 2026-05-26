@@ -84,6 +84,8 @@ def index():
     link += "<a href=/weather>查詢縣市天氣</a><br>"
     link += "<a href=/rate>本周新片DB(含電影分級) </a><br>"
     link += "<a href=/demo>查詢電影、笑話Agent</a><br>"
+    link += "<a href=/AI>'我想查詢靜宜大學資管系的評價？'</a><br>"
+    link += "<a href=/ask>詢問Gemini</a><br>"
     return link
 
 
