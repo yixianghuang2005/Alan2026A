@@ -1,5 +1,6 @@
 from flask import Flask
 from google import genai
+from google.genai import types # 1. 匯入 types 模組來設定進階參數
 
 
 import os
@@ -149,9 +150,15 @@ def webhook():
 
     elif (action == "input.unknown"):
 
+        # 2. 建立設定物件，設定你希望限制的最大 Token 數（例如 500）
+        ai_config = types.GenerateContentConfig(
+            max_output_tokens = 128
+        )
+
         response = client.models.generate_content(
             model='gemini-3.5-flash',
             contents = req["queryResult"]["queryText"],
+            config =ai_config,
         )
         info =  response.text
     
