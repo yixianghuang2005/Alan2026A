@@ -146,9 +146,14 @@ def webhook():
         return make_response(jsonify({
             "fulfillmentText": final_response
         }))
-        
+
     elif (action == "input.unknown"):
-        info =  req["queryResult"]["queryText"]
+
+        response = client.models.generate_content(
+            model='gemini-3.5-flash',
+            contents = req["queryResult"]["queryText"],
+        )
+        info =  response.text
     
 
     return make_response(jsonify({"fulfillmentText": info}))
