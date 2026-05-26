@@ -1,3 +1,7 @@
+from flask import Flask
+from google import genai
+
+
 import os
 import json
 import firebase_admin
@@ -23,6 +27,12 @@ firebase_admin.initialize_app(cred)
 from datetime import datetime
 import random
 app = Flask(__name__)
+# 建立 Client 時保持括號空白！
+# SDK 會自動去抓你設定的 GEMINI_API_KEY 環境變數
+
+client = genai.Client()
+
+
 
 @app.route("/")
 def index():
