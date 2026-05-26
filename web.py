@@ -151,7 +151,7 @@ def webhook():
         info =  req["queryResult"]["queryText"]
     
 
-    return make_response(jsonify({"fulfillmentText": "Action 無法辨識"}))
+    return make_response(jsonify({"fulfillmentText": info}))
 
 @app.route("/rate")
 def rate():
